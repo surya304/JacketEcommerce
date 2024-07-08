@@ -19,15 +19,21 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <h2 class="mb-3">Update Profile</h2>
-            <form action="/profile" method="post">
+            <form onsubmit="validateForm(event)">
+
                 <div class="mb-3">
                     <label for="name" class="form-label">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="Profile">
+                    <div id="nameError" class="text-danger"></div>
                 </div>
+
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
                     <input type="email" class="form-control" id="email" name="email" value="a@b.com">
+                    <div id="emailError" class="text-danger"></div>
                 </div>
+
+
                 <button type="submit" class="btn btn-primary">Update Profile</button>
             </form>
         </div>
@@ -35,5 +41,25 @@
 </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="js/validations.js"></script>
+
+    <script>
+
+        function validateForm(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+
+            if (name || email) {
+                return;
+            }
+
+           
+
+            alert('Profile updated successfully');
+
+        }
+    </script>
 </body>
 </html>
