@@ -38,12 +38,11 @@
     <div class="form-container">
         <form onsubmit="validateForm(event)">
             <h2 class="text-center mb-4">Login</h2>
-            <div class="mb-3"> 
+            <div class="mb-3">
                 <label for="email" class="form-label">Email address</label>
-                 <input type="email"
-                    class="form-control" id="email" aria-describedby="emailHelp" required>
+                <input type="email" class="form-control" id="email" aria-describedby="emailHelp" required>
 
-                    <div id="emailError" class="text-danger"></div>
+                <div id="emailError" class="text-danger"></div>
 
 
             </div>
@@ -82,22 +81,26 @@
             };
 
 
-            console.log(formData,"data");
+            console.log(formData, "data");
 
             $.ajax({
                 type: "POST",
                 url: "/login",
                 data: formData,
-                success: function(response) {
+                success: function (response) {
                     console.log(response);
                     if (response.error) {
                         alert(response.error);
                     } else {
                         window.location.href = "/";
                     }
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                    console.error("An error occurred: " + error);
+                    alert("An error occurred while processing your request. Please try again.");
                 }
             });
-
 
         }
     </script>

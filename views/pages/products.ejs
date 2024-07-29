@@ -7,42 +7,150 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">  
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-      <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
 
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
 
-    
-  
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown:hover .dropbtn {
+            background-color: #3e8e41;
+        }
+    </style>
 </head>
 <body>
     <%- include('../partials/navbar') %>
-
     <div class="container my-4">
-        <div class="dropdown mb-4">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" alt="product1">
-                Filter by price
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                <li><a class="dropdown-item" href="#">Lowest to highest</a></li>
-                <li><a class="dropdown-item" href="#">Highest to lowest</a></li>
-            </ul>
-        </div>
         <div class="row">
-            <% for(let i=0; i<5; i++) { %>
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow bg-dark text-white">
-                        <img src="https://mybucket4345.s3.us-east-2.amazonaws.com/php/Screenshot+2024-03-05+144326.png" class="card-img-top" alt="Product image">
-                        <div class="card-body">
-                            <h5 class="card-title">Product Title</h5>
-                            <p class="card-text text-light">Product description</p>
-                            <p class="card-text text-success">$99.99</p>
-                            <p class="card-text text-warning">★★★★☆</p>
-                            <a href="/productDetails" class="btn btn-primary">Add To Cart</a>
+            <div class="col-md-3">
+                <h4>Categories</h4>
+                <ul class="list-group" id="category-list">
+                    <!-- Categories will be populated here -->
+                </ul>
+            </div>
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between mb-4">
+                    <div>
+                        <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+                    </div>
+                    <div class="dropdown">
+                        <button class="dropbtn">Filter by price</button>
+                        <div class="dropdown-content">
+                            <a href="#" onclick="filterProducts('asc')">Lowest to highest</a>
+                            <a href="#" onclick="filterProducts('desc')">Highest to lowest</a>
                         </div>
                     </div>
                 </div>
-            <% } %>
+                <div class="mb-4">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search products by name">
+                    <button class="btn btn-primary mt-2" onclick="searchProducts()">Search</button>
+                </div>
+                <div class="row" id="product-list">
+                <!-- Products will be populated here -->
+            </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchCategories();
+        fetchProducts();
+        
+        function fetchCategories() {
+            fetch('/api/categories')
+                .then(response => response.json())
+                .then(categories => {
+                    const categoryList = document.getElementById('category-list');
+                    categories.forEach(category => {
+                        const listItem = document.createElement('li');
+                        listItem.classList.add('list-group-item');
+                        listItem.innerHTML = `<a  onclick="filterByCategory('${category._id}')">${category.name}</a>`;
+                        categoryList.appendChild(listItem);
+                    });
+                });
+        }
+
+        function fetchProducts(searchQuery = '') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryId = urlParams.get('categoryId');
+            const priceOrder = urlParams.get('priceOrder');
+            let apiUrl = '/api/products';
+            if (categoryId || priceOrder || searchQuery) {
+                apiUrl += '?';
+                if (categoryId) apiUrl += `categoryId=${categoryId}&`;
+                if (priceOrder) apiUrl += `priceOrder=${priceOrder}&`;
+                if (searchQuery) apiUrl += `search=${searchQuery}`;
+            }
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(products => {
+                    const productList = document.getElementById('product-list');
+                    productList.innerHTML = '';
+                    products.forEach(product => {
+                        const productCard = document.createElement('div');
+                        productCard.classList.add('col-md-4');
+                        productCard.innerHTML = `
+                            <div class="card mb-4">
+                                <img src="${product.images[0]}" class="card-img-top" alt="${product.name}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${product.name}</h5>
+                                    <p class="card-text">${product.description}</p>
+                                    <p class="card-text">$${product.price}</p>
+                                    <a href="/productDetails/${product._id}" class="btn btn-primary">View</a>
+                                </div>
+                            </div>
+                        `;
+                        productList.appendChild(productCard);
+                    });
+                });
+        }
+
+        window.filterByCategory = function(categoryId) {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('categoryId', categoryId);
+            window.location.search = urlParams.toString();
+        }
+
+        window.filterProducts = function(priceOrder) {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('priceOrder', priceOrder);
+            window.location.search = urlParams.toString();
+        }
+
+        window.clearFilters = function() {
+            window.location.search = '';
+        }
+
+        window.searchProducts = function() {
+            const searchQuery = document.getElementById('searchInput').value;
+            fetchProducts(searchQuery);
+        }
+    });
+</script>
 </body>
 </html>

@@ -1,9 +1,8 @@
-
 let mongoose = require('mongoose');
 
 mongoose.Promise = require('bluebird');
 
-//MongoDB schemas
+// MongoDB schemas
 let Schema = mongoose.Schema;
 
 let cartSchema = new Schema({
@@ -14,4 +13,4 @@ let cartSchema = new Schema({
     updated_at: Date
 });
 
-export default mongoose.model('Cart', cartSchema);
+module.exports = mongoose.model('Cart', cartSchema);
