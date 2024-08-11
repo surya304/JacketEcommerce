@@ -2,8 +2,10 @@ const express = require('express');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const Product = require('./models/product');
+const Cart = require('./models/cart');
 console.log('Product:');
 
+const Order = require('./models/order'); // Adjust the path as necessary
 
 const userController = require('./controllers/usercontrollers');
 require('dotenv').config();
@@ -81,10 +83,51 @@ app.get('/login', (req, res) => {
     res.render('pages/login');
 });
 
-app.get('/cart', (req, res) => {
-    res.render('pages/cart');
+app.get('/cart', isLoggedIn, async (req, res) => {
+  res.render('pages/cart');
 });
 
+
+app.post('/api/orders', isLoggedIn, async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        const { cartItems } = req.body;
+
+        const order = new Order({
+            user_id: userId,
+            product_id: cartItems.map(item => item._id),
+            quantity: cartItems.reduce((acc, item) => acc + item.quantity, 0),
+            created_at: new Date(),
+            updated_at: new Date()
+        });
+
+        await order.save();
+        
+        await Cart.findOneAndUpdate({ user_id: userId }, { product_id: [], updated_at: new Date() });
+
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error placing order:', error);
+        res.status(500).json({ success: false });
+    }
+});
+app.get('/api/cart', isLoggedIn, async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        const cart = await Cart.findOne({ user_id: userId }).populate('product_id');
+        const cartItems = cart.product_id.map(product => ({
+            name: product.name,
+            price: product.price,
+            quantity: 1, // Assuming quantity is 1 for simplicity
+            image: product.image // Assuming product has an image field
+        }));
+        res.json({ cartItems });
+    } catch (error) {
+        console.error('Error fetching cart data:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 app.get('/admin/product', (req, res) => {
     res.render('pages/adminproduct');
 });
@@ -167,7 +210,6 @@ app.post('/forgotpassword', userController.forgotPassword);
 app.post('/resetpassword', userController.resetPassword);
 
 
-const Cart = require('./models/cart'); // Adjust the path as necessary
 
 app.get('/productDetails/:id', async (req, res) => {
     try {

@@ -13,5 +13,5 @@ let orderSchema = new Schema({
     updated_at: Date
 });
 
-export default mongoose.model('Order', orderSchema);
 
+module.exports = mongoose.model('Order', orderSchema);
