@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const Product = require('./models/product');
+console.log('Product:');
 
 
 const userController = require('./controllers/userControllers');
