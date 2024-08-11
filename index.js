@@ -5,7 +5,7 @@ const Product = require('./models/product');
 console.log('Product:');
 
 
-const userController = require('./controllers/userControllers');
+const userController = require('./controllers/usercontrollers');
 require('dotenv').config();
 
 const app = express();
