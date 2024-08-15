@@ -218,7 +218,7 @@ app.get('/productDetails/:id', async (req, res) => {
         if (!product) {
             return res.status(404).send('Product not found');
         }
-        res.render('pages/productdetails', { product });
+        res.render('pages/productDetails', { product });
     } catch (error) {
         console.error('Error fetching product details:', error);
         res.status(500).send('Internal Server Error');
