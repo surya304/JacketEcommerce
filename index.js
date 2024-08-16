@@ -75,6 +75,20 @@ app.get('/ordersummary', (req, res) => {
     res.render('pages/ordersummary', dummyOrderData);
 });
 
+
+// async function updateProductImages() {
+//     try {
+//         const imageUrl = 'https://mybucket4345.s3.us-east-2.amazonaws.com/capstone/Screenshot+2024-03-05+144332.png';
+//         await Product.updateMany({}, { $set: { images: [imageUrl] } });
+//         console.log('All product images updated successfully');
+//     } catch (error) {
+//         console.error('Error updating product images:', error);
+//     } finally {
+//         mongoose.connection.close();
+//     }
+// }
+
+// updateProductImages();
 app.get('/signup', (req, res) => {
     res.render('pages/signup');
 });
